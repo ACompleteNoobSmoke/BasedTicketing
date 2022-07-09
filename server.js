@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const bodyParser = require("body-parser");
 var path = require('path');
+const db = require('./repo/UserDB');
 app.set('views', path.join(__dirname, 'pages'));
 app.set('view engine', 'ejs');
 
@@ -39,6 +40,7 @@ app.post('/signininfo', (req, res) => {
 //Gets data from the registration page
 app.post('/registerinfo', (req, res) => {
     console.log(req.body);
+    db.dbMethods.enterInfo(req.body);
 })
 
 app.listen(3001);
