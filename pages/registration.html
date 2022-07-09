@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="static/styles/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="main">
+            <form action='/registerinfo' method="post">
+
+                <h1>Thank you for registering.</h1>
+                <h3>Please fill out the form below.</h3>
+                <div>
+                    <input type="text" placeholder="First Name" name="firstname" required>
+                </div>
+                <div>
+                    <input type="text" placeholder="Last Name" name="lastname" required>
+                </div>
+
+                <div>
+                    <input type="text" placeholder="Username" name="username" required>
+                </div>
+                <div>
+                    <input type="text" placeholder="Password" name="password" required>
+                </div>
+                <div>
+                    <input type="text" placeholder="Confirm Password" name="confirmPassword" required>
+                </div>
+                <div>
+                    <input type="text" placeholder="Gender" name="gender" required>
+                </div>
+                <div>
+                    <input type="date" placeholder="Date of Birth" name="dob" required>
+                </div>
+                <div>
+                    <label for="console">Choose a console:</label>
+                    <select name="console" id="console" required>
+                        <option value="sony">Sony</option>
+                        <option value="nintendo">Nintendo</option>
+                        <option value="microsoft">Microsoft</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="submit">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

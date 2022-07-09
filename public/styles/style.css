@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans&family=Lato:wght@100;400&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #3e3e3e;
+}
+
+.container{
+    position: relative;
+
+}
+
+.container .main{
+    border-radius: 10px;
+    margin-top: 15%;
+    font-family: 'Josefin Sans', sans-serif;
+    font-family: 'Lato', sans-serif;
+    color: #12a5e5;
+    margin-left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    padding: 2em;
+    width: 40%;
+    background-color: #5e5e5e;
+}
+
+.main input, button{
+    margin: .1em;
+}
+
+.main a{
+    position: absolute;
+    bottom: .5em;
+    right: .5em;
+}
