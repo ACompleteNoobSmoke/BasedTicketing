@@ -24,13 +24,13 @@
                 </div>
 
                 <div>
-                    <input type="text" placeholder="Username" name="username" required>
+                    <input class="username" type="text" placeholder="Username" name="username" required>
                 </div>
                 <div>
-                    <input type="text" placeholder="Password" name="password" required>
+                    <input id="password" type="text" placeholder="Password" name="password" onchange="passwordValidation()" required>
                 </div>
                 <div>
-                    <input type="text" placeholder="Confirm Password" name="confirmPassword" required>
+                    <input id="confirmPassword" type="text" placeholder="Confirm Password" name="confirmPassword" onchange="passwordValidation()" required>
                 </div>
                 <div>
                     <input type="text" placeholder="Gender" name="gender" required>
@@ -53,7 +53,8 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="static/JS/script.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </body>
 
 </html>
