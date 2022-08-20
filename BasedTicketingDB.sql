@@ -12,3 +12,5 @@ Console varchar(250)
 );
 
 select * from userInfo;
+
+truncate table userInfo;

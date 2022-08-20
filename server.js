@@ -3,6 +3,7 @@ const app = express();
 const bodyParser = require("body-parser");
 var path = require('path');
 const db = require('./repo/UserDB');
+const email = require('./public/JS/emailapi');
 const { JSDOM } = require( "jsdom" );
 const { window } = new JSDOM( "" );
 const $ = require( "jquery" )( window );
@@ -40,12 +41,17 @@ app.get('/successpage', (req, res) => {
     res.sendFile(__dirname + '/pages/registration_success.html');
 })
 
+//Link to successful registration
+app.get('/userhome', (req, res) => {
+    res.sendFile(__dirname + '/pages/user_home.html');
+})
+
 //Gets data from sign in page
 app.post('/signininfo', (req, res) => {
     const userName = req.body.username;
     const password = req.body.password;
     db.dbMethods.getUser(userName, password).then(function(user){
-        let redirectLink = (typeof user !== 'undefined') ? '/successpage' : '/';
+        let redirectLink = (typeof user !== 'undefined') ? '/userhome' : '/';
         res.redirect(redirectLink);
     });
 })
@@ -56,6 +62,8 @@ app.post('/registerinfo', (req, res) => {
     db.dbMethods.getUserByUserName(username).then(function(user){
         if(typeof user === 'undefined'){
             db.dbMethods.enterInfo(req.body);
+            const newUserAccount = returnNewAccountObject(req.body);
+            email.newRegistrationEmail(newUserAccount);
             res.redirect('/successpage');
         }else{
             res.redirect('/registrationPage');
@@ -63,8 +71,14 @@ app.post('/registerinfo', (req, res) => {
     }); 
 })
 
-$('.username').change(function(){
-    console.log("Working");
-})
+const returnNewAccountObject = body => {
+    return {
+                firstName: body.firstname,
+                lastName:  body.lastname,
+                userName:  body.username,
+                password:  body.password,
+                console:   body.console
+    }
+}
 
 app.listen(3001);

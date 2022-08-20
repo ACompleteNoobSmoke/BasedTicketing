@@ -1,5 +1,3 @@
-
-
 //Checks to make sure Password & Confirm Password field matches
 function passwordValidation(){
     var password = document.getElementById("password").value;
