@@ -62,8 +62,7 @@ app.post('/registerinfo', (req, res) => {
     db.dbMethods.getUserByUserName(username).then(function(user){
         if(typeof user === 'undefined'){
             db.dbMethods.enterInfo(req.body);
-            const newUserAccount = returnNewAccountObject(req.body);
-            email.newRegistrationEmail(newUserAccount);
+            sendRegistrationEmail(req.body);
             res.redirect('/successpage');
         }else{
             res.redirect('/registrationPage');
@@ -71,14 +70,15 @@ app.post('/registerinfo', (req, res) => {
     }); 
 })
 
-const returnNewAccountObject = body => {
-    return {
-                firstName: body.firstname,
-                lastName:  body.lastname,
-                userName:  body.username,
-                password:  body.password,
-                console:   body.console
+const sendRegistrationEmail = body => {
+    const newUserAccountInfo = {
+        firstName: body.firstname,
+        lastName:  body.lastname,
+        userName:  body.username,
+        password:  body.password,
+        console:   body.console
     }
+    email.newRegistrationEmail(newUserAccountInfo);
 }
 
 app.listen(3001);
