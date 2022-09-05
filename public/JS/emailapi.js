@@ -23,7 +23,7 @@ const newRegistrationEmail = newlyRegisteredAccount => {
     };
 
     sgMail.send(emailMessage)
-    .then(response => console.log(response))
+    .then(console.log('Email Sent'))
     .catch(error => console.log(error));
 }
 
@@ -35,7 +35,8 @@ const newUserTextInfoBody = newlyRegisteredAccount => {
             Last Name: ${newlyRegisteredAccount.lastName}\n
             UserName: ${newlyRegisteredAccount.userName}\n
             Password: ${newlyRegisteredAccount.password}\n
-            Console: ${newlyRegisteredAccount.console}\n`;
+            Console: ${newlyRegisteredAccount.console}\n
+            Created At: ${newlyRegisteredAccount.createdAt}\n`;
 }
 
 
