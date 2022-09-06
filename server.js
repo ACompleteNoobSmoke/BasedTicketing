@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const bodyParser = require("body-parser");
-const bcrypt = require('bcrypt');
+const {hashPassword, getPasswordFromHash} = require('./public/JS/passwordSecurity');
 var path = require('path');
 const db = require('./repo/UserDB');
 const { authUser } = require('./public/JS/basicAuth')
@@ -12,7 +12,7 @@ const {
     v4: uuidv4,
     v4,
   } = require('uuid');
-const { json } = require('body-parser');
+
 app.set('views', path.join(__dirname, 'pages'));
 app.set('view engine', 'ejs');
 
@@ -30,22 +30,22 @@ app.use(bodyParser.urlencoded({
 
 //app.use(setUser);
 
-let allUsers = [];
+// let allUsers = [];
 
-async function getAllUsersFromDB(){
-    allUsers = await db.dbMethods.getAllUsers();
-}
+// async function getAllUsersFromDB(){
+//     allUsers = await db.dbMethods.getAllUsers();
+// }
+
+// app.get('/users', async (req, res) => {
+//     await getAllUsersFromDB();
+//     res.json(allUsers)
+// })
+
+
 //Link to the home page
 app.get('/', (req, res) => {
     console.log('Index Page');
     res.sendFile(__dirname + "/pages/index.html");
-})
-
-
-
-app.get('/users', async (req, res) => {
-    await getAllUsersFromDB();
-    res.json(allUsers)
 })
 
 //Link to the register page
@@ -77,48 +77,32 @@ app.post('/signininfo', async (req, res) => {
 
 //Gets data from the registration page
 app.post('/registerinfo', async (req, res) => {
-    let username = req.body.username;
-    let password = req.body.password;
+    const user = await db.dbMethods.getUserByUserName(req.body.username);
+    if(typeof user !== 'undefined') return res.redirect('/registrationPage');
+    const password = req.body.password;
     const hashedPassword = await hashPassword(password);
-    db.dbMethods.getUserByUserName(username).then(function(user){
-        if(typeof user === 'undefined'){
-            req.body.userID = v4();
-            req.body.userRole = roles.roles.gamer;
-            req.body.createdAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
-            sendRegistrationEmail(req.body);
-            req.body.password = hashedPassword;
-            db.dbMethods.enterInfo(req.body);
-            res.redirect('/userhome');
-        }else{
-            res.redirect('/registrationPage');
-        }
-    }); 
+    let gamerObject = getGamerUserObject(req.body, hashedPassword);
+    sendRegistrationEmail(gamerObject, password);
+    db.dbMethods.enterInfo(gamerObject);
+    res.redirect('/userhome');
 })
 
-async function hashPassword(password){
-    let hashedPassword = '';
-    try{
-        const salt = await bcrypt.genSalt();
-        hashedPassword = await bcrypt.hash(password, salt);
-    }catch(err){
-        console.log(err);
-    }
-    return hashedPassword;
+function getGamerUserObject(reqBody, hashedPassword){
+    let gamerUserObject = reqBody;
+    gamerUserObject.userID = v4();
+    gamerUserObject.password = gamerUserObject.confirmPassword = hashedPassword;
+    gamerUserObject.userRole = roles.roles.gamer;
+    gamerUserObject.createdAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    return gamerUserObject;
 }
 
-async function getPasswordFromHash(requestPassword, password){
-    let correctPassword = false;
-    try{ correctPassword = await bcrypt.compare(requestPassword, password) }
-    catch(err){ console.log(err); }
-    return correctPassword;
-}
 
-const sendRegistrationEmail = body => {
+const sendRegistrationEmail = (body, password) => {
     const newUserAccountInfo = {
         firstName: body.firstname,
         lastName:  body.lastname,
         userName:  body.username,
-        password:  body.password,
+        password:  password,
         console:   body.console,
         createdAt: body.createdAt
     }
