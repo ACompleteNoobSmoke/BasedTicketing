@@ -4,7 +4,9 @@ const bodyParser = require("body-parser");
 const {hashPassword, getPasswordFromHash} = require('./public/JS/passwordSecurity');
 var path = require('path');
 const db = require('./repo/UserDB');
-const { authUser } = require('./public/JS/basicAuth')
+const { authUser } = require('./public/JS/basicAuth');
+const sessions = require('express-session');
+const cookieParser = require('cookie-parser');
 const email = require('./public/JS/emailapi');
 const roles = require('./public/JS/UserRoles');
 const { 
@@ -22,6 +24,20 @@ app.use('/static', express.static(path.join(__dirname, '/public')));
 
 //Used to get the script folder
 app.use('/visual', express.static(path.join(__dirname, "/public")));
+
+let session;
+
+
+const oneDay = 1000 * 60 * 60 * 24;
+
+app.use(sessions({
+    secret: 'TBD',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {maxAge: oneDay}
+}));
+
+app.use(cookieParser());
 
 //Used to parse the data in the body
 app.use(bodyParser.urlencoded({
@@ -63,7 +79,10 @@ app.get('/successpage', (req, res) => {
 
 //Link to successful registration
 app.get('/userhome', (req, res) => {
-    res.sendFile(__dirname + '/pages/user_home.html');
+    session = req.session;
+    if(session.userid)
+        return res.sendFile(__dirname + '/pages/user_home.html');
+    res.redirect('/');
 })
 
 //Gets data from sign in page
@@ -71,9 +90,20 @@ app.post('/signininfo', async (req, res) => {
     const user = await db.dbMethods.getUserByUserName(req.body.username);
     if(typeof user === 'undefined') return res.redirect('/');
     const passwordAccepted = await getPasswordFromHash(req.body.password, user.Password);
-    let redirectLink = passwordAccepted ? '/userhome' : '/';
+    let redirectLink = '/';
+    if(passwordAccepted){
+        session = req.session;
+        session.userid = user.UserID;
+        console.log(session);
+        redirectLink = '/userhome';
+    }
     res.redirect(redirectLink);
 })
+
+app.get('/logout',(req,res) => {
+    req.session.destroy();
+    res.redirect('/');
+});
 
 //Gets data from the registration page
 app.post('/registerinfo', async (req, res) => {
@@ -82,6 +112,8 @@ app.post('/registerinfo', async (req, res) => {
     const password = req.body.password;
     const hashedPassword = await hashPassword(password);
     let gamerObject = getGamerUserObject(req.body, hashedPassword);
+    session = req.session;
+    session.userid = gamerObject.userID;
     sendRegistrationEmail(gamerObject, password);
     db.dbMethods.enterInfo(gamerObject);
     res.redirect('/userhome');
