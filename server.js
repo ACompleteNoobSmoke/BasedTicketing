@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const {hashPassword, getPasswordFromHash} = require('./public/JS/passwordSecurity');
 var path = require('path');
 const db = require('./repo/UserDB');
-const { authUser } = require('./public/JS/basicAuth');
+const { authUser, authRole } = require('./public/JS/basicAuth');
 const sessions = require('express-session');
 const cookieParser = require('cookie-parser');
 const email = require('./public/JS/emailapi');
@@ -78,7 +78,7 @@ app.get('/successpage', (req, res) => {
 
 
 //Link to successful registration
-app.get('/userhome', (req, res) => {
+app.get('/userhome/:userName', authRole(['Gamer', 'Admin']), (req, res) => {
     session = req.session;
     if(session.userid)
         return res.sendFile(__dirname + '/pages/user_home.html');
@@ -92,10 +92,11 @@ app.post('/signininfo', async (req, res) => {
     const passwordAccepted = await getPasswordFromHash(req.body.password, user.Password);
     let redirectLink = '/';
     if(passwordAccepted){
+        //session.userid = user.UserID;
+        req.session.userRole = user.Role;
+        req.session.userid = user.UserID;
         session = req.session;
-        session.userid = user.UserID;
-        console.log(session);
-        redirectLink = '/userhome';
+        redirectLink = `/userhome/${user.UserName}`;
     }
     res.redirect(redirectLink);
 })
@@ -139,13 +140,6 @@ const sendRegistrationEmail = (body, password) => {
         createdAt: body.createdAt
     }
     email.newRegistrationEmail(newUserAccountInfo);
-}
-
-function setUser(req, res, next){
-    const userID = req.body.userID;
-    if(userID)
-        req.user = db.dbMethods.getUserByID(userID);
-    next();
 }
 
 app.listen(3001);
