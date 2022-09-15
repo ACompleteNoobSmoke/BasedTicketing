@@ -44,19 +44,6 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-//app.use(setUser);
-
-// let allUsers = [];
-
-// async function getAllUsersFromDB(){
-//     allUsers = await db.dbMethods.getAllUsers();
-// }
-
-// app.get('/users', async (req, res) => {
-//     await getAllUsersFromDB();
-//     res.json(allUsers)
-// })
-
 
 //Link to the home page
 app.get('/', (req, res) => {
@@ -78,11 +65,11 @@ app.get('/successpage', (req, res) => {
 
 
 //Link to successful registration
-app.get('/userhome/:userName', authRole(['Gamer', 'Admin']), (req, res) => {
-    session = req.session;
-    if(session.userid)
+app.get('/userhome/:userName', authRole(['Gamer', 'Admin']), async (req, res) => {
+    const isAuthenticated = await authUser(session.userid, req.params.userName);
+    if(isAuthenticated)
         return res.sendFile(__dirname + '/pages/user_home.html');
-    res.redirect('/');
+    res.status(403).json('YOU DO NOT HAVE ACCESS TO THIS PAGE');
 })
 
 //Gets data from sign in page
@@ -92,7 +79,6 @@ app.post('/signininfo', async (req, res) => {
     const passwordAccepted = await getPasswordFromHash(req.body.password, user.Password);
     let redirectLink = '/';
     if(passwordAccepted){
-        //session.userid = user.UserID;
         req.session.userRole = user.Role;
         req.session.userid = user.UserID;
         session = req.session;
