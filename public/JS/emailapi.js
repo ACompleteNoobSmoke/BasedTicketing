@@ -1,22 +1,21 @@
 require('dotenv').config();
-const SENDGRIDKEY = require('../../SENDGRID');
 const sgMail = require('@sendgrid/mail');
 const { response } = require('express');
-const {emailKey, adminEmail, botEmail} = SENDGRIDKEY.SENGRID_TOKEN;
-sgMail.setApiKey(emailKey)
+const {SENGRID_TOKEN, ADMIN_EMAIL, BOT_EMAIL } = require('../../SENDGRID')
+sgMail.setApiKey(SENGRID_TOKEN)
 
 const newRegistrationEmail = newlyRegisteredAccount => {
     const emailMessage = {
         to: [ 
                 {
-                    email: adminEmail[0]
+                    email: ADMIN_EMAIL[0]
                 },
                 {
-                    email: adminEmail[1]
+                    email: ADMIN_EMAIL[1]
                 }
             ],
         from: {
-            email: botEmail,
+            email: BOT_EMAIL,
             name: 'BASED LOG BOT'
         },
         subject: 'ALERT: New Account Registered - ' + newlyRegisteredAccount.userName,
@@ -24,7 +23,7 @@ const newRegistrationEmail = newlyRegisteredAccount => {
     };
 
     sgMail.send(emailMessage)
-    .then(console.log(response))
+    .then(console.log('Email Sent'))
     .catch(error => console.log(error));
 }
 
