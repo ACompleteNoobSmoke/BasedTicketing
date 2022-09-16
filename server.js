@@ -101,9 +101,10 @@ app.post('/registerinfo', async (req, res) => {
     let gamerObject = getGamerUserObject(req.body, hashedPassword);
     session = req.session;
     session.userid = gamerObject.userID;
+    session.userRole = gamerObject.userRole
     sendRegistrationEmail(gamerObject, password);
     db.dbMethods.enterInfo(gamerObject);
-    res.redirect('/userhome');
+    res.redirect(`/userhome/${gamerObject.username}`);
 })
 
 function getGamerUserObject(reqBody, hashedPassword){
