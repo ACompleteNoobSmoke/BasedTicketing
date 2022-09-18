@@ -13,10 +13,10 @@ async function hashPassword(password){
 }
 
 async function getPasswordFromHash(requestPassword, password){
-    let correctPassword = false;
-    try{ correctPassword = await bcrypt.compare(requestPassword, password) }
+    let isPasswordCorrect = false;
+    try{ isPasswordCorrect = await bcrypt.compare(requestPassword, password) }
     catch(err){ console.log(err); }
-    return correctPassword;
+    return isPasswordCorrect;
 }
 
 module.exports = {hashPassword, getPasswordFromHash};

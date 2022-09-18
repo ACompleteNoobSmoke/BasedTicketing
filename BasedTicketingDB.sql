@@ -16,6 +16,8 @@ CreatedAt timestamp
 
 select * from UserInfo;
 
+select UserID, Password, Role from UserInfo where UserName = 'MaxPayne';
+
 drop table UserInfo;
 
 truncate table userInfo;

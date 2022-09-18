@@ -3,7 +3,7 @@ const app = express();
 const bodyParser = require("body-parser");
 const {hashPassword, getPasswordFromHash} = require('./public/JS/passwordSecurity');
 var path = require('path');
-const db = require('./repo/UserDB');
+const {dbMethods} = require('./repo/UserDB');
 const { authUser, authRole } = require('./public/JS/basicAuth');
 const sessions = require('express-session');
 const cookieParser = require('cookie-parser');
@@ -24,6 +24,8 @@ app.use('/static', express.static(path.join(__dirname, '/public')));
 
 //Used to get the script folder
 app.use('/visual', express.static(path.join(__dirname, "/public")));
+
+
 
 let session;
 
@@ -72,41 +74,50 @@ app.get('/userhome/:userName', authRole(['Gamer', 'Admin']), async (req, res) =>
     res.status(403).json('YOU DO NOT HAVE ACCESS TO THIS PAGE');
 })
 
-//Gets data from sign in page
+//Gets data from sign in page then checks to see if that user data exists in the database
 app.post('/signininfo', async (req, res) => {
-    const user = await db.dbMethods.getUserByUserName(req.body.username);
+    const userName = req.body.username;
+    const user = await dbMethods.getUserSignInInformation(userName)
     if(typeof user === 'undefined') return res.redirect('/');
     const passwordAccepted = await getPasswordFromHash(req.body.password, user.Password);
     let redirectLink = '/';
     if(passwordAccepted){
-        req.session.userRole = user.Role;
-        req.session.userid = user.UserID;
-        session = req.session;
-        redirectLink = `/userhome/${user.UserName}`;
+        populateCurrentSessionInformation(req.session, user.UserID, user.Role);
+        redirectLink = `/userhome/${userName}`;
     }
     res.redirect(redirectLink);
 })
 
+//Logout out the current user and destroys the current session.
 app.get('/logout',(req,res) => {
     req.session.destroy();
     res.redirect('/');
 });
 
-//Gets data from the registration page
+//Posts data from the registration page to the database and sends email to admin
 app.post('/registerinfo', async (req, res) => {
-    const user = await db.dbMethods.getUserByUserName(req.body.username);
-    if(typeof user !== 'undefined') return res.redirect('/registrationPage');
+    const userID = await dbMethods.getUsersID(req.body.username);
+    if(typeof userID !== 'undefined') return res.redirect('/registrationPage');
     const password = req.body.password;
     const hashedPassword = await hashPassword(password);
     let gamerObject = getGamerUserObject(req.body, hashedPassword);
-    session = req.session;
-    session.userid = gamerObject.userID;
-    session.userRole = gamerObject.userRole
+    populateCurrentSessionInformation(req.session, gamerObject.userID,
+         gamerObject.userRole)
     sendRegistrationEmail(gamerObject, password);
-    db.dbMethods.enterInfo(gamerObject);
+    dbMethods.enterAccountInfo(gamerObject);
     res.redirect(`/userhome/${gamerObject.username}`);
 })
 
+//************* HELPER METHODS(Start) **************/
+
+//Populates the current session with the user information
+function populateCurrentSessionInformation(reqSession, userID, userRole){
+    session = reqSession;
+    session.userid = userID;
+    session.userRole = userRole;
+}
+
+//Creates gamer object with request body information and then returns the object
 function getGamerUserObject(reqBody, hashedPassword){
     let gamerUserObject = reqBody;
     gamerUserObject.userID = v4();
@@ -116,7 +127,7 @@ function getGamerUserObject(reqBody, hashedPassword){
     return gamerUserObject;
 }
 
-
+//Sends gamer object to the email api to be sent out to admin.
 const sendRegistrationEmail = (body, password) => {
     const newUserAccountInfo = {
         firstName: body.firstname,
@@ -128,5 +139,7 @@ const sendRegistrationEmail = (body, password) => {
     }
     email.newRegistrationEmail(newUserAccountInfo);
 }
+
+//************* HELPER METHODS(End) **************/
 
 app.listen(3001);

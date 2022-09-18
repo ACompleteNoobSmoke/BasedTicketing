@@ -1,6 +1,6 @@
 require('dotenv').config();
 const sgMail = require('@sendgrid/mail');
-const { response } = require('express');
+//const { response } = require('express');
 const {SENGRID_TOKEN, ADMIN_EMAIL, BOT_EMAIL } = require('../../SENDGRID')
 sgMail.setApiKey(SENGRID_TOKEN)
 
