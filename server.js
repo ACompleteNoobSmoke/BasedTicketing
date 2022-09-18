@@ -123,7 +123,7 @@ function getGamerUserObject(reqBody, hashedPassword){
     gamerUserObject.userID = v4();
     gamerUserObject.password = gamerUserObject.confirmPassword = hashedPassword;
     gamerUserObject.userRole = roles.roles.gamer;
-    gamerUserObject.createdAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    gamerUserObject.createdAt = new Date().toISOString("en-US", {timeZone: "America/Chicago"}).slice(0, 19).replace('T', ' ');
     return gamerUserObject;
 }
 
